@@ -85,7 +85,18 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Get OS build
+        run: |
+          sw_vers > macos_build.txt
+          cat macos_build.txt
+      - name: Cache MacPorts
+        id: cache-macports
+        uses: actions/cache@v2
+        with:
+          path: /opt/local/
+          key: ${{ runner.os }}-macports-${{ hashFiles('macos_build.txt') }}
       - name: Install MacPorts
+        if: steps.cache-macports.outputs.cache-hit != 'true'
         run: |
           curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
           source ./macports-ci install
